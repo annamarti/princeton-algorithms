@@ -10,7 +10,7 @@ public class FastCollinearPoints {
     private final Point[] points;
     private int numberOfSegments;
     private LineSegment[] segments;
-    private Point[][] rightBounderies;
+    private Point[][] segmentBounderies;
 
     // finds all line segments containing 4 or more points
     public FastCollinearPoints(Point[] points) {
@@ -26,7 +26,7 @@ public class FastCollinearPoints {
         this.points = Arrays.copyOf(points, points.length);
         this.numberOfSegments = 0;
         this.segments = new LineSegment[points.length];
-        this.rightBounderies = new Point[points.length][2];
+        this.segmentBounderies = new Point[points.length][2];
         findSegments();
     }
 
@@ -126,8 +126,8 @@ public class FastCollinearPoints {
         if (!containSegment(colliniears[0], colliniears[count])) {
             int current = numberOfSegments++;
             segments[current] = new LineSegment(colliniears[0], colliniears[count]);
-            rightBounderies[current][0] = colliniears[0];
-            rightBounderies[current][1] = colliniears[count];
+            segmentBounderies[current][0] = colliniears[0];
+            segmentBounderies[current][1] = colliniears[count];
         }
     }
 
@@ -141,16 +141,16 @@ public class FastCollinearPoints {
 
         Point[][] tempPoints = new Point[n * 2][2];
         for (int i = 0; i < n; i++) {
-            tempPoints[i][0] = rightBounderies[i][0];
-            tempPoints[i][1] = rightBounderies[i][1];
+            tempPoints[i][0] = segmentBounderies[i][0];
+            tempPoints[i][1] = segmentBounderies[i][1];
         }
-        rightBounderies = tempPoints;
+        segmentBounderies = tempPoints;
     }
 
     private boolean containSegment(Point a, Point b) {
         for (int i = 0; i < numberOfSegments; i++) {
-            if (rightBounderies[i][0].compareTo(a) == 0 &&
-                    rightBounderies[i][1].compareTo(b) == 0) {
+            if (segmentBounderies[i][0].compareTo(a) == 0 &&
+                    segmentBounderies[i][1].compareTo(b) == 0) {
                 return true;
             }
         }
