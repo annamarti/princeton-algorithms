@@ -14,8 +14,8 @@ import java.util.Comparator;
 
 public class Point implements Comparable<Point> {
 
-    private final int x;     // x-coordinate of this point
-    private final int y;     // y-coordinate of this point
+    public final int x;     // x-coordinate of this point
+    public final int y;     // y-coordinate of this point
 
     /**
      * Initializes a new point.
@@ -61,16 +61,20 @@ public class Point implements Comparable<Point> {
      */
     public double slopeTo(Point that) {
         /* YOUR CODE HERE */
-        if (x == that.x) {
-            return 0.0;
+        // Double.NEGATIVE_INFINITY if (x0, y0) and (x1, y1) are equal
+        if (x == that.x && y == that.y) {
+            return Double.NEGATIVE_INFINITY;
         }
+
+        // +0.0 if the line segment connecting the two points is horizontal ???
+        // why
+        if (x == that.x) {
+            return Double.POSITIVE_INFINITY;
+        }
+
+        // Double.POSITIVE_INFINITY if the line segment is vertical ???
         if (y == that.y) {
-            if (x == that.x) {
-                return Double.NEGATIVE_INFINITY;
-            }
-            else {
-                return Double.POSITIVE_INFINITY;
-            }
+            return 0.0;
         }
 
         return (that.y - y) / (double) (that.x - x);
@@ -116,7 +120,7 @@ public class Point implements Comparable<Point> {
         return new SlopeOrder();
     }
 
-    public class SlopeOrder implements Comparator<Point> {
+    private class SlopeOrder implements Comparator<Point> {
         public int compare(Point o1, Point o2) {
             double slope1 = Point.this.slopeTo(o1);
             double slope2 = Point.this.slopeTo(o2);
@@ -147,5 +151,12 @@ public class Point implements Comparable<Point> {
      */
     public static void main(String[] args) {
         /* YOUR CODE HERE */
+        Point p = new Point(1, 8);
+        Point q = new Point(4, 8);
+        Point r = new Point(6, 7);
+
+        System.out.println(p.slopeTo(q));
+        System.out.println(p.slopeTo(r));
+
     }
 }

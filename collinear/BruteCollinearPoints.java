@@ -23,26 +23,26 @@ public class BruteCollinearPoints {
         if (containsDuplicate(points)) {
             throw new IllegalArgumentException("Contains repeated points");
         }
-        this.points = points;
+        int n = points.length;
+        this.points = Arrays.copyOf(points, n);
         this.numberOfSegments = 0;
-        this.segments = new LineSegment[points.length * points.length * points.length
-                * points.length];
+        this.segments = new LineSegment[n];
         findSegments();
     }
 
-    private boolean containsNull(Point[] points) {
-        for (int i = 0; i < points.length; i++) {
-            if (points[i] == null) {
+    private boolean containsNull(Point[] arrayToCheck) {
+        for (int i = 0; i < arrayToCheck.length; i++) {
+            if (arrayToCheck[i] == null) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean containsDuplicate(Point[] points) {
-        for (int i = 0; i < points.length - 1; i++) {
-            for (int j = i + 1; j < points.length; j++) {
-                if (points[i].compareTo(points[j]) == 0) {
+    private boolean containsDuplicate(Point[] arrayToCheck) {
+        for (int i = 0; i < arrayToCheck.length - 1; i++) {
+            for (int j = i + 1; j < arrayToCheck.length; j++) {
+                if (arrayToCheck[i].compareTo(arrayToCheck[j]) == 0) {
                     return true;
                 }
             }
@@ -55,15 +55,14 @@ public class BruteCollinearPoints {
         for (int i = 0; i < length - 3; i++) {
             for (int j = i + 1; j < length - 2; j++) {
                 for (int k = j + 1; k < length - 1; k++) {
-                    for (int l = k + 1; l < length; l++) {
-                        if (isLine(points[i], points[j], points[k], points[l])) {
-                            addSegment(points[i], points[j], points[k], points[l]);
+                    for (int r = k + 1; r < length; r++) {
+                        if (isLine(points[i], points[j], points[k], points[r])) {
+                            addSegment(points[i], points[j], points[k], points[r]);
                         }
                     }
                 }
             }
         }
-        segments = Arrays.copyOf(this.segments, numberOfSegments);
     }
 
     private boolean isLine(Point a, Point b, Point c, Point d) {
@@ -71,16 +70,24 @@ public class BruteCollinearPoints {
             double slopeAC = a.slopeTo(c);
             double slopeAD = a.slopeTo(d);
             return slopeAB == slopeAC && slopeAB == slopeAD;
-
-        // if (b.slopeTo(a) == b.slopeTo(c) && b.slopeTo(a) == b.slopeTo(d)) return true;
-        // if (c.slopeTo(a) == c.slopeTo(b) && c.slopeTo(a) == c.slopeTo(d)) return true;
-        // if (d.slopeTo(a) == d.slopeTo(b) && d.slopeTo(c) == b.slopeTo(b)) return true;
     }
 
     private void addSegment(Point a, Point b, Point c, Point d) {
         Point[] colloiears = {a, b, c, d};
         Arrays.sort(colloiears);
+        if (numberOfSegments == segments.length) {
+            resizeSegments();
+        }
         segments[numberOfSegments++] = new LineSegment(colloiears[0], colloiears[3]);
+
+    }
+
+    private void resizeSegments() {
+        LineSegment[] temp = new LineSegment[segments.length * 2];
+        for (int i = 0; i < segments.length; i++) {
+            temp[i] = segments[i];
+        }
+        segments = temp;
     }
 
     // the number of line segments
@@ -90,6 +97,6 @@ public class BruteCollinearPoints {
 
     // the line segments, should include each line segment containing 4 points exactly once
     public LineSegment[] segments() {
-        return segments;
+        return Arrays.copyOf(segments, numberOfSegments);
     }
 }
