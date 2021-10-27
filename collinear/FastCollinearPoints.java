@@ -10,7 +10,6 @@ public class FastCollinearPoints {
     private final Point[] points;
     private int numberOfSegments;
     private LineSegment[] segments;
-    private Point[][] segmentBounderies;
 
     // finds all line segments containing 4 or more points
     public FastCollinearPoints(Point[] points) {
@@ -26,7 +25,6 @@ public class FastCollinearPoints {
         this.points = Arrays.copyOf(points, points.length);
         this.numberOfSegments = 0;
         this.segments = new LineSegment[points.length];
-        this.segmentBounderies = new Point[points.length][2];
         findSegments();
     }
 
@@ -113,7 +111,6 @@ public class FastCollinearPoints {
     }
 
     private void addSegment(Point a, Point[] copies, int from, int count) {
-
         Point[] colliniears = new Point[count + 1];
         for (int i = 1; i <= count; i++) {
             colliniears[i - 1] = copies[from - i];
@@ -123,11 +120,8 @@ public class FastCollinearPoints {
         if (segments.length == numberOfSegments) {
             resizeSegments();
         }
-        if (!containSegment(colliniears[0], colliniears[count])) {
-            int current = numberOfSegments++;
-            segments[current] = new LineSegment(colliniears[0], colliniears[count]);
-            segmentBounderies[current][0] = colliniears[0];
-            segmentBounderies[current][1] = colliniears[count];
+        if (a.compareTo(colliniears[0]) == 0) {
+            segments[numberOfSegments++] = new LineSegment(colliniears[0], colliniears[count]);
         }
     }
 
@@ -138,25 +132,8 @@ public class FastCollinearPoints {
             temp[i] = segments[i];
         }
         segments = temp;
-
-        Point[][] tempPoints = new Point[n * 2][2];
-        for (int i = 0; i < n; i++) {
-            tempPoints[i][0] = segmentBounderies[i][0];
-            tempPoints[i][1] = segmentBounderies[i][1];
-        }
-        segmentBounderies = tempPoints;
     }
 
-    private boolean containSegment(Point a, Point b) {
-        for (int i = 0; i < numberOfSegments; i++) {
-            if (segmentBounderies[i][0].compareTo(a) == 0 &&
-                    segmentBounderies[i][1].compareTo(b) == 0) {
-                return true;
-            }
-        }
-
-        return false;
-    }
     // the number of line segments
     public int numberOfSegments() {
         return numberOfSegments;
