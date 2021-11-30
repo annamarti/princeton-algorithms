@@ -2,7 +2,6 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.algs4.StdOut;
 
-import java.util.Comparator;
 import java.util.LinkedList;
 
 public class Solver {
@@ -22,8 +21,8 @@ public class Solver {
     }
 
     private void solve() {
-        MinPQ<Node> queue = new MinPQ<>(priority());
-        MinPQ<Node> twinQueue = new MinPQ<>(priority());
+        MinPQ<Node> queue = new MinPQ<>();
+        MinPQ<Node> twinQueue = new MinPQ<>();
         solvable = true;
 
         if (initial.isGoal()) {
@@ -112,7 +111,7 @@ public class Solver {
         return solution;
     }
 
-    private class Node {
+    private class Node implements Comparable<Node> {
         Node previous;
         Board board;
         int manhatten;
@@ -138,14 +137,10 @@ public class Solver {
         public int moves() {
             return moves;
         }
-    }
 
-    private Comparator<Node> priority() {
-        return new Comparator<Node>() {
-            public int compare(Node o1, Node o2) {
-                return Integer.compare(o1.manhatten(), o2.manhatten());
-            }
-        };
+        public int compareTo(Node that) {
+            return Integer.compare(this.manhatten(), that.manhatten());
+        }
     }
 
 
