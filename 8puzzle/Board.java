@@ -29,6 +29,7 @@ public class Board {
     // string representation of this board
     public String toString() {
         StringBuilder result = new StringBuilder(tiles.length).append("\n");
+        result.append(dimension + "\n");
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < dimension; j++) {
                 result.append(tiles[i][j] + " ");
@@ -101,7 +102,7 @@ public class Board {
         if (y == null) {
             return false;
         }
-        if (!(y.getClass().equals(Board.class))) {
+        if (!(y instanceof Board)) {
             return false;
         }
         Board that = (Board) y;
@@ -117,32 +118,51 @@ public class Board {
         findBlank();
 
         if (blankI - 1 >= 0) {
-            boards.add(getNeighborBySwaping(blankI - 1, blankJ));
+            boards.add(getNewBoardBySwapingWithBlank(blankI - 1, blankJ));
         }
 
         if (blankI + 1 < dimension) {
-            boards.add(getNeighborBySwaping(blankI + 1, blankJ));
+            boards.add(getNewBoardBySwapingWithBlank(blankI + 1, blankJ));
         }
 
         if (blankJ - 1 >= 0) {
-            boards.add(getNeighborBySwaping(blankI, blankJ - 1));
+            boards.add(getNewBoardBySwapingWithBlank(blankI, blankJ - 1));
         }
 
         if (blankJ + 1 < dimension) {
-            boards.add(getNeighborBySwaping(blankI, blankJ + 1));
+            boards.add(getNewBoardBySwapingWithBlank(blankI, blankJ + 1));
         }
         return boards;
     }
 
     // a board that is obtained by exchanging any pair of tiles
     public Board twin() {
-        // Board twi
         if (blankI == -1) {
             findBlank();
         }
-        int i = blankI == 0 ? blankI + 1 : blankI - 1;
-        int j = blankJ == 0 ? blankJ + 1 : blankJ - 1;
-        return getNeighborBySwaping(i, j);
+
+        int i1 = -1, j1 = -1;
+        int i2 = -1, j2 = -1;
+        int notZeros = 0;
+
+        for (int i = 0; i < dimension && notZeros < 2; i++) {
+            for (int j = 0; j < dimension && notZeros < 2; j++) {
+                if (tiles[i][j] != 0) {
+                    if (notZeros == 0) {
+                        i1 = i;
+                        j1 = j;
+                        notZeros++;
+                    }
+                    else if (notZeros == 1) {
+                        i2 = i;
+                        j2 = j;
+                        notZeros++;
+                    }
+                }
+            }
+        }
+
+        return getNewBoardBySwaping(i1, j1, i2, j2);
     }
 
     private void findBlank() {
@@ -165,11 +185,20 @@ public class Board {
     }
 
     // get neighbor by swaping blank with (i, j)
-    private Board getNeighborBySwaping(int i, int j) {
-        Board board = new Board(tiles);
-        board.tiles[blankI][blankJ] = tiles[i][j];
-        board.tiles[i][j] = 0;
-        return board;
+    private Board getNewBoardBySwapingWithBlank(int i, int j) {
+        return getNewBoardBySwaping(i, j, blankI, blankJ);
+    }
+
+    private Board getNewBoardBySwaping(int i1, int j1, int i2, int j2) {
+        Board newBoard = new Board(tiles);
+        swap(newBoard, i1, j1, i2, j2);
+        return newBoard;
+    }
+
+    private void swap(Board board, int i1, int j1, int i2, int j2) {
+        int temp = board.tiles[i1][j1];
+        board.tiles[i1][j1] = tiles[i2][j2];
+        board.tiles[i2][j2] = temp;
     }
 
 
@@ -184,13 +213,18 @@ public class Board {
             }
         }
         Board initial = new Board(blocks);
-        Board initial2 = new Board(blocks);
 
+        // Board initial2 = new Board(blocks);
+        // printBoard(initial);
+        // System.out.println(initial.equals(initial2));
+        // System.out.println("IS goal: " + initial.isGoal());
+        // System.out.println("hamming distance: " + initial.hamming());
+        // initial.neighbors().forEach(b -> printBoard(b));
+
+        Board twin = initial.twin();
+        System.out.println("Initial and twin");
         printBoard(initial);
-        System.out.println(initial.equals(initial2));
-        System.out.println("IS goal: " + initial.isGoal());
-        System.out.println("hamming distance: " + initial.hamming());
-        initial.neighbors().forEach(b -> printBoard(b));
+        printBoard(twin);
     }
 
     private static void printBoard(Board board) {
