@@ -74,8 +74,8 @@ public class Board {
         manhattan = 0;
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < dimension; j++) {
-                int mustbeI = tiles[i][j] / dimension;
-                int mustbeJ = tiles[i][j] % dimension - 1;
+                int mustbeI = (tiles[i][j] - 1) / dimension;
+                int mustbeJ = tiles[i][j] - mustbeI * dimension - 1;
                 int distance = Math.abs(i - mustbeI) + Math.abs(j - mustbeJ);
                 manhattan += distance;
             }
@@ -102,7 +102,7 @@ public class Board {
         if (y == null) {
             return false;
         }
-        if (!(y instanceof Board)) {
+        if (!(Board.class != y.getClass())) {
             return false;
         }
         Board that = (Board) y;
