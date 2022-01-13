@@ -4,8 +4,8 @@ import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.StdDraw;
 
 import java.awt.Color;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class KdTree {
     private Node root;
@@ -15,14 +15,14 @@ public class KdTree {
         Point2D point;
         Node left;
         Node right;
-        int level;
+        int depth;
         Node parent;
         RectHV rect;
 
-        public Node(Point2D point, Node parent, int level, RectHV rect) {
+        public Node(Point2D point, Node parent, int depth, RectHV rect) {
             this.point = point;
             this.parent = parent;
-            this.level = level;
+            this.depth = depth;
             this.rect = rect;
         }
     }
@@ -48,12 +48,16 @@ public class KdTree {
         checkForNull(p);
         if (root == null) {
             root = new Node(p, null, 0, new RectHV(0, 0, 1, 1));
+            size++;
             return;
         }
         insert(root, p, 0);
     }
 
     private void insert(Node node, Point2D point, int depth) {
+        if (node.point.equals(point)) {
+            return;
+        }
         RectHV leftRect = getLeftRect(node, depth);
         RectHV rightRect = getRightRect(node, depth);
         if (less(point, node, depth)) {
@@ -61,15 +65,17 @@ public class KdTree {
 
             if (node.left == null) {
                 node.left = new Node(point, node, depth + 1, leftRect);
+                size++;
             }
             else {
                 insert(node.left, point, depth + 1);
             }
         }
         else {
-            // do right
+            // go right
             if (node.right == null) {
                 node.right = new Node(point, node, depth + 1, rightRect);
+                size++;
             }
             else {
                 insert(node.right, point, depth + 1);
@@ -154,23 +160,21 @@ public class KdTree {
             StdDraw.setPenRadius(0.01);
             node.point.draw();
 
-            Color lineColor = node.level % 2 == 0 ? Color.RED : Color.BLUE;
+            Color lineColor = node.depth % 2 == 0 ? Color.RED : Color.BLUE;
             StdDraw.setPenColor(lineColor);
             StdDraw.setPenRadius(0.002);
             Point2D startPoint = getStartPoint(node);
             Point2D finishPoint = getFinishPoint(node);
             startPoint.drawTo(finishPoint);
+
             draw(node.left);
             draw(node.right);
-
-            // double from
-            node.point.draw();
         }
     }
 
     private Point2D getStartPoint(Node node) {
         Point2D startPoint;
-        if (node.level % 2 == 0) {
+        if (node.depth % 2 == 0) {
             startPoint = new Point2D(node.point.x(), node.rect.ymin());
         }
         else {
@@ -181,7 +185,7 @@ public class KdTree {
 
     private Point2D getFinishPoint(Node node) {
         Point2D finishPoint;
-        if (node.level % 2 == 0) {
+        if (node.depth % 2 == 0) {
             finishPoint = new Point2D(node.point.x(), node.rect.ymax());
         }
         else {
@@ -193,12 +197,12 @@ public class KdTree {
     // all points that are inside the rectangle (or on the boundary)
     public Iterable<Point2D> range(RectHV rect) {
         checkForNull(rect);
-        Set<Point2D> pointsInRect = new TreeSet<>();
+        List<Point2D> pointsInRect = new ArrayList<>();
         range(rect, root, pointsInRect);
         return pointsInRect;
     }
 
-    private void range(RectHV rect, Node currentNode, Set<Point2D> pointsInRec) {
+    private void range(RectHV rect, Node currentNode, List<Point2D> pointsInRec) {
         if (currentNode == null) {
             return;
         }
@@ -218,7 +222,7 @@ public class KdTree {
             return null;
         }
         else {
-            return nearest(p, root, root.point, p.distanceTo(root.point));
+            return nearest(p, root, root.point, p.distanceSquaredTo(root.point));
         }
     }
 
@@ -228,32 +232,32 @@ public class KdTree {
             return null;
         }
 
-        if (currentNode.rect.distanceTo(queryPoint) > closestDistance) {
+        if (currentNode.rect.distanceSquaredTo(queryPoint) > closestDistance) {
             return null;
         }
 
-        double currentNodeDistance = queryPoint.distanceTo(currentNode.point);
+        double currentNodeDistance = queryPoint.distanceSquaredTo(currentNode.point);
         if (currentNodeDistance < closestDistance) {
             closestDistance = currentNodeDistance;
             closestPoint = currentNode.point;
         }
 
         Point2D leftNearest = nearest(queryPoint, currentNode.left, closestPoint, closestDistance);
-        double leftNodeDistance = leftNearest != null ? leftNearest.distanceTo(queryPoint) :
-                                  Double.POSITIVE_INFINITY;
-        if (leftNodeDistance < closestDistance) {
-            closestDistance = leftNodeDistance;
-            closestPoint = leftNearest;
+        if (leftNearest != null) {
+            double leftNodeDistance = leftNearest.distanceSquaredTo(queryPoint);
+            if (leftNodeDistance < closestDistance) {
+                closestDistance = leftNodeDistance;
+                closestPoint = leftNearest;
+            }
         }
 
         Point2D rightNearest = nearest(queryPoint, currentNode.right, closestPoint,
                                        closestDistance);
-        double rightNodeDistance = rightNearest != null ?
-                                   rightNodeDistance = rightNearest.distanceTo(queryPoint) :
-                                   Double.POSITIVE_INFINITY;
-        if (rightNodeDistance < closestDistance) {
-            closestDistance = rightNodeDistance;
-            closestPoint = rightNearest;
+        if (rightNearest != null) {
+            double rightNodeDistance = rightNearest.distanceSquaredTo(queryPoint);
+            if (rightNodeDistance < closestDistance) {
+                closestPoint = rightNearest;
+            }
         }
 
         return closestPoint;
@@ -266,6 +270,7 @@ public class KdTree {
         In in = new In(filename);
         PointSET brute = new PointSET();
         KdTree kdtree = new KdTree();
+
         while (!in.isEmpty()) {
             double x = in.readDouble();
             double y = in.readDouble();
@@ -278,7 +283,7 @@ public class KdTree {
 
         RectHV rect = new RectHV(0, 0.2, 1, 1);
 
-        StdDraw.setPenRadius(.02);
+        StdDraw.setPenRadius(0.02);
         StdDraw.setPenColor(StdDraw.GREEN);
         for (Point2D p : kdtree.range(rect))
             p.draw();
@@ -293,12 +298,19 @@ public class KdTree {
         StdDraw.show();
 
         Point2D nearest = new Point2D(0.1, 0.3);
+        Point2D nearest1 = kdtree.nearest(nearest);
         StdDraw.setPenColor(Color.MAGENTA);
         StdDraw.setPenRadius(0.025);
         nearest.draw();
-        Point2D nearest1 = kdtree.nearest(nearest);
         nearest1.draw();
         StdDraw.show();
-        System.out.println(nearest1);
+
+        kdtree.insert(new Point2D(0.5, 0.5));
+        System.out.println("Kd tree size before adding duplicate : " + kdtree.size());
+        kdtree.insert(new Point2D(0.5, 0.5));
+        System.out.println("Kd tree size after adding duplicate : " + kdtree.size());
+
+
+
     }
 }
