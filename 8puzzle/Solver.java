@@ -114,24 +114,20 @@ public class Solver {
     private class Node implements Comparable<Node> {
         Node previous;
         Board board;
-        int manhatten;
-        int moves;
+        final int manhatten;
+        final int moves;
+        final int priority;
 
         public Node(Board board, int moves) {
             this.board = board;
             this.moves = moves;
             manhatten = board.manhattan();
+            priority = manhatten + moves;
         }
 
         public Node(Node previous, Board board, int moves) {
+            this(board, moves);
             this.previous = previous;
-            this.board = board;
-            this.moves = moves;
-            manhatten = board.manhattan();
-        }
-
-        public int manhatten() {
-            return manhatten + moves;
         }
 
         public int moves() {
@@ -139,7 +135,7 @@ public class Solver {
         }
 
         public int compareTo(Node that) {
-            return Integer.compare(this.manhatten(), that.manhatten());
+            return Integer.compare(this.priority, that.priority);
         }
     }
 
