@@ -5,6 +5,7 @@ import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class SAP {
@@ -89,8 +90,8 @@ public class SAP {
         }
     }
 
-    private void validateVertex(int v) {
-        if (v < 0 || v >= digraph.V()) {
+    private void validateVertex(Integer v) {
+        if (v == null || v < 0 || v >= digraph.V()) {
             throw new IllegalArgumentException();
         }
     }
@@ -108,7 +109,7 @@ public class SAP {
             StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
             StdOut.printf("length = %d, ancestor = %d\n",
                           sap.length(new ArrayList<>(), new ArrayList<>()),
-                          sap.ancestor(new ArrayList<>(), new ArrayList<>()));
+                          sap.ancestor(Arrays.asList(5, null), new ArrayList<>()));
         }
     }
 }
